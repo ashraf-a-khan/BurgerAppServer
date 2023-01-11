@@ -75,6 +75,10 @@ const schema = new mongoose.Schema({
         enum: ["COD", "Online"],
         default: "COD",
     },
+    stripeToken: {
+        type: "String",
+        required: true,
+    },
 
     paymentInfo: {
         type: mongoose.Schema.ObjectId,

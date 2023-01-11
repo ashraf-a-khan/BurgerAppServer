@@ -6,6 +6,7 @@ import {
     // paymentVerification,
     placeOrder,
     placeOrderOnline,
+    stripeToken,
     // placeOrderOnline,
     processOrder,
 } from "../controllers/order.js";
@@ -16,6 +17,8 @@ const router = express.Router();
 router.post("/createorder", placeOrder);
 
 router.post("/createorderonline", placeOrderOnline);
+
+router.post("/createtoken", stripeToken);
 
 // router.post("/createorderonline", isAuthenticated, placeOrderOnline);
 

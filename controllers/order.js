@@ -1,8 +1,10 @@
 import { asyncError } from "../middlewares/errorMiddleware.js";
 import { Order } from "../models/Order.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
+import { stripe } from "../server.js";
 
 export const placeOrder = asyncError(async (req, res, next) => {
+    console.log({ req });
     const {
         shippingInfo,
         orderItems,
@@ -11,6 +13,7 @@ export const placeOrder = asyncError(async (req, res, next) => {
         taxPrice,
         shippingCharges,
         totalAmount,
+        stripeToken,
     } = req.body;
 
     const user = "req.user._id";
@@ -24,6 +27,7 @@ export const placeOrder = asyncError(async (req, res, next) => {
         shippingCharges,
         totalAmount,
         user,
+        stripeToken,
     };
 
     await Order.create(orderOptions);
@@ -34,11 +38,41 @@ export const placeOrder = asyncError(async (req, res, next) => {
     });
 });
 
+export const stripeToken = asyncError(async (req, res) => {
+    try {
+        // Retrieve the credit card information from the request body
+        const { number, exp_month, exp_year, cvc } = req.body;
+        // Create a token using the credit card information
+        const token = await stripe.tokens.create({
+            card: {
+                number,
+                exp_month,
+                exp_year,
+                cvc,
+            },
+        });
+        // Send the token as the response
+        res.status(201).json({
+            success: true,
+            message: "Token created successfully",
+            token: token,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Error creating token",
+            error: error,
+        });
+    }
+});
+
 export const placeOrderOnline = asyncError(async (req, res, next) => {
+    // console.log({ req });
+    // console.log({ res });
     const {
         shippingInfo,
         orderItems,
-        paymentMethod,
+        stripeToken,
         itemsPrice,
         taxPrice,
         shippingCharges,
@@ -50,20 +84,34 @@ export const placeOrderOnline = asyncError(async (req, res, next) => {
     const orderOptions = {
         shippingInfo,
         orderItems,
-        paymentMethod,
+        paymentMethod: "Online",
         itemsPrice,
         taxPrice,
         shippingCharges,
         totalAmount,
         user,
+        stripeToken,
     };
 
-    await Order.create(orderOptions);
-
-    res.status(201).json({
-        success: true,
-        message: "Order Placed Successfully via Cash On Delivery",
+    const charge = await stripe.charges.create({
+        amount: totalAmount * 100,
+        currency: "usd",
+        source: stripeToken,
+        description: `Order #${Math.floor(Math.random() * 1000000)}`,
     });
+
+    if (charge.status === "succeeded") {
+        await Order.create(orderOptions);
+        res.status(201).json({
+            success: true,
+            message: "Order Placed Successfully via Stripe",
+        });
+    } else {
+        res.status(400).json({
+            success: false,
+            message: "Error processing the payment",
+        });
+    }
 });
 
 export const getMyOrders = asyncError(async (req, res, next) => {
