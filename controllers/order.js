@@ -2,6 +2,11 @@ import { asyncError } from "../middlewares/errorMiddleware.js";
 import { Order } from "../models/Order.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
 import { stripe } from "../server.js";
+import { Payment } from "../models/Payment.js";
+import mongoose from "mongoose";
+import crypto from "crypto";
+
+let globalToken = "";
 
 export const placeOrder = asyncError(async (req, res, next) => {
     console.log({ req });
@@ -51,6 +56,8 @@ export const stripeToken = asyncError(async (req, res) => {
                 cvc,
             },
         });
+        // globalToken = token.id;
+
         // Send the token as the response
         res.status(201).json({
             success: true,
@@ -111,6 +118,72 @@ export const placeOrderOnline = asyncError(async (req, res, next) => {
             success: false,
             message: "Error processing the payment",
         });
+    }
+});
+
+export const paymentVerification = asyncError(async (req, res, next) => {
+    const {
+        shippingInfo,
+        orderItems,
+        stripeToken,
+        itemsPrice,
+        taxPrice,
+        shippingCharges,
+        totalAmount,
+        stripe_charge_id,
+        stripe_customer_id,
+        stripe_payment_status,
+        createdAt,
+    } = req.body;
+
+    const user = "req.user._id";
+
+    const orderOptions = {
+        shippingInfo,
+        orderItems,
+        paymentMethod: "Online",
+        itemsPrice,
+        taxPrice,
+        shippingCharges,
+        totalAmount,
+        user,
+        stripeToken,
+    };
+
+    // const { stripeToken, orderOptions } = req.body;
+    const buffer = crypto.randomBytes(12);
+    const stringOf12Bytes = buffer.toString("hex");
+
+    try {
+        const charge = await stripe.charges.create({
+            amount: totalAmount * 100,
+            currency: "usd",
+            source: stripeToken,
+            description: `Order #${Math.floor(Math.random() * 1000000)}`,
+        });
+
+        const payment = await Payment.create({
+            stripe_charge_id,
+            stripe_customer_id,
+            stripe_payment_status,
+        });
+
+        if (charge.status === "succeeded") {
+            await Order.create({
+                ...orderOptions,
+                paidAt: new Date(Date.now()),
+                paymentInfo: payment._id,
+            });
+
+            res.status(201).json({
+                success: true,
+                message: `Order Placed Successfully. Payment ID: ${charge.id}`,
+            });
+        } else {
+            return next(new ErrorHandler("Payment Failed", 400));
+        }
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
     }
 });
 

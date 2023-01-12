@@ -3,7 +3,7 @@ import {
     getAdminOrders,
     getMyOrders,
     getOrderDetails,
-    // paymentVerification,
+    paymentVerification,
     placeOrder,
     placeOrderOnline,
     stripeToken,
@@ -22,7 +22,7 @@ router.post("/createtoken", stripeToken);
 
 // router.post("/createorderonline", isAuthenticated, placeOrderOnline);
 
-// router.post("/paymentverification", isAuthenticated, paymentVerification);
+router.post("/paymentverification", paymentVerification);
 
 router.get("/myorders", isAuthenticated, getMyOrders);
 
