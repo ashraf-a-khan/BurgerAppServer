@@ -14,15 +14,13 @@ import { authorizeAdmin, isAuthenticated } from "../middlewares/auth.js";
 
 const router = express.Router();
 
-router.post("/createorder", placeOrder);
+router.post("/createorder", isAuthenticated, placeOrder);
 
-router.post("/createorderonline", placeOrderOnline);
+router.post("/createorderonline", isAuthenticated, placeOrderOnline);
 
-router.post("/createtoken", stripeToken);
+router.post("/createtoken", isAuthenticated, stripeToken);
 
-// router.post("/createorderonline", isAuthenticated, placeOrderOnline);
-
-router.post("/paymentverification", paymentVerification);
+router.post("/paymentverification", isAuthenticated, paymentVerification);
 
 router.get("/myorders", isAuthenticated, getMyOrders);
 

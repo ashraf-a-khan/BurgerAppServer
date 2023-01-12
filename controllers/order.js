@@ -21,7 +21,7 @@ export const placeOrder = asyncError(async (req, res, next) => {
         stripeToken,
     } = req.body;
 
-    const user = "req.user._id";
+    const user = req.user._id;
 
     const orderOptions = {
         shippingInfo,
@@ -86,7 +86,7 @@ export const placeOrderOnline = asyncError(async (req, res, next) => {
         totalAmount,
     } = req.body;
 
-    const user = "req.user._id";
+    const user = req.user._id;
 
     const orderOptions = {
         shippingInfo,
@@ -136,7 +136,7 @@ export const paymentVerification = asyncError(async (req, res, next) => {
         createdAt,
     } = req.body;
 
-    const user = "req.user._id";
+    const user = req.user._id;
 
     const orderOptions = {
         shippingInfo,
@@ -151,8 +151,6 @@ export const paymentVerification = asyncError(async (req, res, next) => {
     };
 
     // const { stripeToken, orderOptions } = req.body;
-    const buffer = crypto.randomBytes(12);
-    const stringOf12Bytes = buffer.toString("hex");
 
     try {
         const charge = await stripe.charges.create({
