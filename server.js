@@ -1,7 +1,7 @@
 import app from "./app.js";
 import cors from "cors";
 import express from "express";
-import STRIPE_SDK from "stripe";
+import Stripe from "stripe";
 
 import { connectDB } from "./config/database.js";
 
@@ -9,9 +9,7 @@ connectDB();
 
 // require("dotenv").config();
 
-// const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-
-export const stripe = new STRIPE_SDK(process.env.STRIPE_SECRET_KEY);
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // const app = express();
 

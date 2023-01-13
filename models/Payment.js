@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+mongoose.set("strictQuery", true);
 
 const schema = new mongoose.Schema({
     stripe_charge_id: {
