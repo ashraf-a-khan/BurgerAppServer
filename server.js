@@ -4,14 +4,11 @@ import express from "express";
 import Stripe from "stripe";
 
 import { connectDB } from "./config/database.js";
+import { redisClient } from "./app.js";
 
 connectDB();
 
-// require("dotenv").config();
-
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
-// const app = express();
 
 // Middlewares here
 app.use(express.json());
@@ -21,13 +18,14 @@ app.get("/", (req, res, next) => {
     res.send("<h1>Working</h1>");
 });
 
+process.on("SIGINT", () => {
+    console.log("Closing redisClient...");
+    redisClient.quit();
+    process.exit();
+});
+
 app.listen(process.env.PORT, () =>
     console.log(
         `Server is working on PORT: ${process.env.PORT}, in ${process.env.NODE_ENV} MODE`
     )
 );
-
-// // Listen
-// app.listen(8000, () => {
-//   console.log("Server started at port 8000");
-// });
