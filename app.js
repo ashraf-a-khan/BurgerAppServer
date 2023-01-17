@@ -24,12 +24,11 @@ export const redisClient = redis.createClient({
 
 redisClient.connect();
 
+redisClient.ping().then(console.log).catch(console.error);
+
 const RedisStore1 = RedisStore(session);
 const redisStore = new RedisStore1({
     client: redisClient,
-    host: process.env.REDIS_HOST,
-    port: process.env.REDIS_PORT,
-    ttl: process.env.REDIS_TTL,
 });
 
 redisClient.on("connect", function (err) {
@@ -39,6 +38,8 @@ redisClient.on("connect", function (err) {
         console.log("Connected to Redis successfully!");
     }
 });
+
+// console.log("redisStore", redisStore);
 
 const app = express();
 export default app;
@@ -53,7 +54,7 @@ app.use(
 
 app.use(
     session({
-        store: redisStore,
+        // store: redisStore,
         secret: process.env.SESSION_SECRET,
         resave: false,
         saveUninitialized: false,
