@@ -10,6 +10,7 @@ import { errorMiddleware } from "./middlewares/errorMiddleware.js";
 import cors from "cors";
 import redis from "redis";
 import RedisStore from "connect-redis";
+import MemoryStore from "memorystore";
 
 // const redisClient = redis.createClient();
 
@@ -17,27 +18,29 @@ dotenv.config({
     path: "./config/config.env",
 });
 
-export const redisClient = redis.createClient({
-    host: process.env.REDIS_HOST,
-    port: process.env.REDIS_PORT,
-});
+// export const redisClient = redis.createClient({
+//     host: process.env.REDIS_HOST,
+//     port: process.env.REDIS_PORT,
+// });
 
-redisClient.connect();
+// redisClient.connect();
 
-redisClient.ping().then(console.log).catch(console.error);
+// redisClient.ping().then(console.log).catch(console.error);
 
-const RedisStore1 = RedisStore(session);
-const redisStore = new RedisStore1({
-    client: redisClient,
-});
+// const RedisStore1 = RedisStore(session);
+// const redisStore = new RedisStore1({
+//     client: redisClient,
+// });
 
-redisClient.on("connect", function (err) {
-    if (err) {
-        console.log("Could not establish a connection with Redis. " + err);
-    } else {
-        console.log("Connected to Redis successfully!");
-    }
-});
+const MemoryStoreSession = MemoryStore(session);
+
+// redisClient.on("connect", function (err) {
+//     if (err) {
+//         console.log("Could not establish a connection with Redis. " + err);
+//     } else {
+//         console.log("Connected to Redis successfully!");
+//     }
+// });
 
 // console.log("redisStore", redisStore);
 
@@ -52,16 +55,36 @@ app.use(
     })
 );
 
+// app.use(
+//     session({
+//         store: new MemoryStoreSession({
+//             checkPeriod: 86400000,
+//         }),
+//         secret: process.env.SESSION_SECRET,
+//         resave: false,
+//         saveUninitialized: false,
+//         cookie: {
+//             secure: process.env.NODE_ENV === "development" ? false : true,
+//             httpOnly: process.env.NODE_ENV === "development" ? false : true,
+//             sameSite: process.env.NODE_ENV === "development" ? false : "strict",
+//             maxAge: 1000 * 60 * 60 * 24,
+//         },
+//     })
+// );
+
 app.use(
     session({
-        // store: redisStore,
+        store: new MemoryStoreSession({
+            checkPeriod: 86400000,
+        }),
         secret: process.env.SESSION_SECRET,
         resave: false,
         saveUninitialized: false,
         cookie: {
-            secure: process.env.NODE_ENV === "development" ? false : true,
-            httpOnly: process.env.NODE_ENV === "development" ? false : true,
-            sameSite: process.env.NODE_ENV === "development" ? false : "none",
+            secure: process.env.NODE_ENV === "production",
+            secure: false,
+            httpOnly: true,
+            sameSite: "strict",
             maxAge: 1000 * 60 * 60 * 24,
         },
     })
@@ -89,6 +112,6 @@ app.use("/api/v1", orderRoute);
 //Using Error Middleware
 app.use(errorMiddleware);
 
-redisClient.on("error", (err) => {
-    console.log("Error connecting to Redis:", err);
-});
+// redisClient.on("error", (err) => {
+//     console.log("Error connecting to Redis:", err);
+// });
