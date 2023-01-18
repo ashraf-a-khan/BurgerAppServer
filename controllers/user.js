@@ -27,10 +27,11 @@ export const logout = (req, res, next) => {
             res.status(500).send("Error logging out");
         } else {
             res.clearCookie("connect.sid", {
-                secure: process.env.NODE_ENV === "development" ? false : true,
-                httpOnly: process.env.NODE_ENV === "development" ? false : true,
-                sameSite:
-                    process.env.NODE_ENV === "development" ? false : "none",
+                // secure: process.env.NODE_ENV === "development" ? false : true,
+                // httpOnly: process.env.NODE_ENV === "development" ? false : true,
+                // sameSite:
+                //     process.env.NODE_ENV === "development" ? false : "none",
+                path: "/",
             });
             res.status(200).send("Successfully logged out");
         }
