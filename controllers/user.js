@@ -27,16 +27,16 @@ export const logout = (req, res, next) => {
     req.session.destroy((err) => {
         if (err) return next(err);
 
-        const options = {
-            httpOnly: true,
-            sameSite: "strict",
-        };
+        // const options = {
+        //     httpOnly: true,
+        //     sameSite: "strict",
+        // };
 
-        if (process.env.NODE_ENV === "production") {
-            options.secure = true;
-        }
+        // if (process.env.NODE_ENV === "production") {
+        //     options.secure = true;
+        // }
 
-        res.clearCookie("connect.sid", options);
+        res.clearCookie("connect.sid");
         res.status(200).json({
             message: "Logged Out",
         });
