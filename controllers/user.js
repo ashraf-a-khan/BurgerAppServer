@@ -29,10 +29,10 @@ export const logout = (req, res, next) => {
 
         const options = {
             httpOnly: true,
-            sameSite: "none",
+            sameSite: "strict",
         };
 
-        if (process.env.NODE_ENV !== "development") {
+        if (process.env.NODE_ENV === "production") {
             options.secure = true;
         }
 
