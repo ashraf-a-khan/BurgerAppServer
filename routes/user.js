@@ -30,7 +30,7 @@ router.get(
 
 router.get("/me", isAuthenticated, myProfile);
 
-router.post("/logout", logout);
+router.get("/logout", logout);
 
 router.get("/admin/users", isAuthenticated, authorizeAdmin, getAdminUsers);
 
