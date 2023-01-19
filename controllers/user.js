@@ -22,6 +22,7 @@ export const logout = (req, res, next) => {
     //     });
     // });
     req.session.destroy((err) => {
+        console.log("Some shit");
         if (err) {
             console.error(err);
             res.status(500).send("Error logging out");
