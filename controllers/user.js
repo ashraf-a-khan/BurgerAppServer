@@ -3,6 +3,7 @@ import { User } from "../models/User.js";
 import { Order } from "../models/Order.js";
 
 export const myProfile = (req, res, next) => {
+    console.log("res", res);
     res.status(200).json({
         success: true,
         user: req.user,
@@ -27,7 +28,6 @@ export const logout = (req, res, next) => {
             console.error(err);
             res.status(500).send("Error logging out");
         } else {
-            
             res.clearCookie(
                 "connect.sid"
                 // {
